@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Patent strzelecki — trener egzaminacyjny</title>
+<style>
+  :root{
+    --bg:#f4f4ef; --card:#ffffff; --ink:#1c2321; --muted:#6b7370;
+    --accent:#2f5d3a; --accent-ink:#ffffff;
+    --ok:#2e7d32; --ok-bg:#e6f4e7; --bad:#c62828; --bad-bg:#fdebea;
+    --line:#dcdcd4;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+       background:var(--bg); color:var(--ink); font-size:17px; line-height:1.45;}
+  .wrap{max-width:560px; margin:0 auto; padding:16px 14px 40px;}
+  header{display:flex; align-items:center; gap:10px; padding:6px 0 14px;}
+  .logo{width:34px;height:34px;border-radius:50%;border:3px solid var(--accent);
+        display:flex;align-items:center;justify-content:center;flex:none;}
+  .logo::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--accent);}
+  h1{font-size:19px; margin:0; font-weight:700; letter-spacing:.2px;}
+  .sub{color:var(--muted); font-size:13px; margin:0;}
+  h2{font-size:16px; margin:22px 0 10px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px;}
+  button{font:inherit; cursor:pointer;}
+  .block-btn{display:flex; width:100%; align-items:center; justify-content:space-between;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; margin-bottom:10px; text-align:left; font-size:16px;}
+  .block-btn:active{background:#eef1ec;}
+  .block-btn .n{color:var(--muted); font-size:13px; margin-left:10px; flex:none;}
+  .exam-btn{width:100%; background:var(--accent); color:var(--accent-ink); border:none;
+    border-radius:14px; padding:16px; font-size:17px; font-weight:700; margin:6px 0 4px;}
+  .exam-note{font-size:13px; color:var(--muted); margin:0 0 6px;}
+  .hidden{display:none !important;}
+
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .quit{background:none; border:none; color:var(--muted); font-size:14px; padding:6px;}
+  .counter{font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .progress{height:6px; background:#e3e5dd; border-radius:3px; overflow:hidden; margin-bottom:16px;}
+  .progress > div{height:100%; background:var(--accent); width:0%; transition:width .25s;}
+  .qtag{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;}
+  .qtext{font-size:18px; font-weight:600; margin:0 0 16px;}
+  .ans{display:block; width:100%; text-align:left; background:var(--card);
+    border:1.5px solid var(--line); border-radius:12px; padding:13px 14px;
+    margin-bottom:10px; font-size:16px; line-height:1.4;}
+  .ans:disabled{opacity:1;}
+  .ans.ok{background:var(--ok-bg); border-color:var(--ok); color:var(--ok); font-weight:600;}
+  .ans.bad{background:var(--bad-bg); border-color:var(--bad); color:var(--bad); font-weight:600;}
+  .ans.dim{opacity:.55;}
+  .expl{border-left:4px solid var(--accent); background:#eef3ee; border-radius:0 10px 10px 0;
+    padding:10px 12px; font-size:14.5px; margin:4px 0 14px; color:#2c3a30;}
+  .next-btn{width:100%; background:var(--ink); color:#fff; border:none; border-radius:12px;
+    padding:15px; font-size:16px; font-weight:700;}
+
+  .score-big{font-size:44px; font-weight:800; margin:4px 0; font-variant-numeric:tabular-nums;}
+  .verdict{font-size:18px; font-weight:700; margin-bottom:4px;}
+  .verdict.pass{color:var(--ok);} .verdict.fail{color:var(--bad);}
+  .wrong-item{border-top:1px solid var(--line); padding:12px 0;}
+  .wrong-item:first-child{border-top:none;}
+  .wrong-q{font-weight:600; margin:0 0 6px;}
+  .wrong-a{margin:0 0 3px; font-size:15px;}
+  .wrong-a .lbl{font-size:12px; text-transform:uppercase; letter-spacing:.4px;}
+  .wrong-a.you{color:var(--bad);} .wrong-a.corr{color:var(--ok);}
+  .row{display:flex; gap:10px; margin-top:14px;}
+  .row button{flex:1; border-radius:12px; padding:14px; font-size:15px; font-weight:700; border:none;}
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-ghost{background:#e7e9e1; color:var(--ink);}
+  footer{margin-top:26px; font-size:12.5px; color:var(--muted); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"></div>
+    <div>
+      <h1>Patent strzelecki — trener</h1>
+      <p class="sub">Pytania ABC · nauka blokami · egzamin próbny</p>
+    </div>
+  </header>
+
+  <!-- MENU -->
+  <div id="view-menu">
+    <div class="card">
+      <p style="margin:0 0 8px;"><strong>Egzamin próbny</strong> — 10 losowych pytań jak na prawdziwym egzaminie: po 2 z każdego z 5 zagadnień. Zaliczenie: min. 9/10, a pierwsze 4 pytania (UoBiA i bezpieczeństwo) bez ani jednego błędu. Czas orientacyjny: 20 minut.</p>
+      <button class="exam-btn" onclick="startExam()">Rozpocznij egzamin próbny</button>
+    </div>
+    <h2>Nauka blokami tematycznymi</h2>
+    <div id="block-list"></div>
+    <footer>Opracowanie do samodzielnej nauki na podstawie UoBiA, KK i regulaminów PZSS/ISSF.<br>Kliknięta odpowiedź podświetla się na zielono (dobrze) lub czerwono (źle).</footer>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="view-quiz" class="hidden">
+    <div class="topbar">
+      <button class="quit" onclick="quitToMenu()">‹ Przerwij</button>
+      <span class="counter" id="counter"></span>
+    </div>
+    <div class="progress"><div id="pbar"></div></div>
+    <p class="qtag" id="qtag"></p>
+    <p class="qtext" id="qtext"></p>
+    <div id="answers"></div>
+    <div id="expl" class="expl hidden"></div>
+    <button id="next" class="next-btn hidden" onclick="nextQuestion()">Dalej</button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="view-summary" class="hidden">
+    <div class="card" style="text-align:center;">
+      <p class="qtag" id="sum-mode"></p>
+      <div class="score-big" id="sum-score"></div>
+      <div id="sum-verdict"></div>
+      <p class="sub" id="sum-hint"></p>
+    </div>
+    <div id="sum-wrong-wrap">
+      <h2>Do poprawy</h2>
+      <div class="card" id="sum-wrong"></div>
+    </div>
+    <div class="row">
+      <button class="btn-ghost" onclick="quitToMenu()">Menu</button>
+      <button class="btn-primary" id="retry" onclick="retrySame()">Jeszcze raz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== BAZA PYTAŃ =====================
+// b: blok, q: pytanie, a: [3 odpowiedzi] (pierwsza jest poprawna, kolejność losowana przy wyświetlaniu), e: wyjaśnienie
+const BANK = [
+// ---------- UoBiA i przepisy wykonawcze ----------
+{b:"uobia", q:"Zgodnie z art. 2 Ustawy o broni i amunicji, poza przypadkami określonymi w ustawie, nabywanie, posiadanie oraz zbywanie broni i amunicji jest:", a:["zabronione","dozwolone po ukończeniu 18 lat","dozwolone po zgłoszeniu na Policję"], e:"Art. 2 UoBiA — zasada reglamentacji: wszystko poza przypadkami z ustawy jest zabronione."},
+{b:"uobia", q:"Pozwolenie na broń wydaje:", a:["właściwy komendant wojewódzki Policji","komendant powiatowy Policji","wójt, burmistrz lub prezydent miasta"], e:"Art. 9 UoBiA. Żołnierzom zawodowym pozwolenia wydaje Żandarmeria Wojskowa."},
+{b:"uobia", q:"Pozwolenie na broń wydaje się co do zasady osobie, która ukończyła:", a:["21 lat","18 lat","25 lat"], e:"Art. 15 UoBiA. Wyjątkowo 18 lat — na wniosek szkoły, organizacji sportowej, PZŁ lub stowarzyszenia obronnego."},
+{b:"uobia", q:"Ważną przyczyną posiadania broni do celów sportowych jest:", a:["członkostwo w stowarzyszeniu strzeleckim, kwalifikacje sportowe (patent) i licencja polskiego związku sportowego","samo członkostwo w klubie strzeleckim","chęć doskonalenia umiejętności strzeleckich"], e:"Art. 10 ust. 3 pkt 3 UoBiA — wymagane są łącznie wszystkie trzy elementy."},
+{b:"uobia", q:"Broń do celów sportowych w rozumieniu UoBiA to m.in. broń bocznego zapłonu z lufami gwintowanymi o kalibrze:", a:["do 6 mm","do 12 mm","do 9 mm"], e:"Art. 10 ust. 4 pkt 4: boczny zapłon do 6 mm, centralny zapłon do 12 mm, gładkolufowa i czarnoprochowa."},
+{b:"uobia", q:"Broń centralnego zapłonu do celów sportowych może mieć kaliber:", a:["do 12 mm","do 6 mm","bez ograniczeń"], e:"Art. 10 ust. 4 pkt 4 UoBiA."},
+{b:"uobia", q:"Od egzaminu przed Policją zwolnieni są m.in.:", a:["członkowie PZSS posiadający licencję zawodniczą","wszyscy członkowie klubów strzeleckich","osoby, które ukończyły kurs strzelecki"], e:"Art. 16 ust. 2 UoBiA — dlatego patent + licencja PZSS pozwalają uniknąć egzaminu policyjnego."},
+{b:"uobia", q:"Nabytą broń należy zarejestrować w ciągu:", a:["5 dni od dnia nabycia","14 dni od dnia nabycia","30 dni od dnia nabycia"], e:"Art. 13 UoBiA — rejestracja u organu, który wydał pozwolenie, w ciągu 5 dni."},
+{b:"uobia", q:"O utracie broni należy zawiadomić Policję:", a:["niezwłocznie, nie później niż w ciągu 24 godzin","w ciągu 7 dni","w ciągu 14 dni"], e:"Art. 25 UoBiA."},
+{b:"uobia", q:"O zmianie miejsca stałego pobytu posiadacz pozwolenia zawiadamia pisemnie organ Policji w terminie:", a:["14 dni od dnia zmiany","24 godzin","30 dni"], e:"Art. 26 UoBiA; niedopełnienie to wykroczenie z art. 51."},
+{b:"uobia", q:"Amunicję można nabywać:", a:["wyłącznie do broni określonej w legitymacji posiadacza broni","do dowolnej broni palnej","do każdej broni tego samego rodzaju, co posiadana"], e:"Art. 14 UoBiA. Nawet jeden nabój w kalibrze spoza pozwolenia to przestępstwo z art. 263 §2 KK."},
+{b:"uobia", q:"Używanie broni palnej w celach szkoleniowych lub sportowych jest dopuszczalne:", a:["wyłącznie na strzelnicy","wszędzie poza terenem zabudowanym","na strzelnicy lub na własnej nieruchomości"], e:"Art. 45 UoBiA; naruszenie to wykroczenie z art. 51 ust. 2 pkt 11."},
+{b:"uobia", q:"Bez pozwolenia i rejestracji można posiadać broń palną:", a:["czarnoprochową rozdzielnego ładowania wytworzoną przed 1885 r. oraz jej repliki","każdą broń historyczną sprzed 1945 r.","każdą broń czarnoprochową"], e:"Art. 11 UoBiA — kluczowe: rozdzielne ładowanie i granica roku 1885 (lub replika takiej broni)."},
+{b:"uobia", q:"Regulamin strzelnicy zatwierdza:", a:["wójt, burmistrz lub prezydent miasta w drodze decyzji administracyjnej","komendant wojewódzki Policji","Polski Związek Strzelectwa Sportowego"], e:"Art. 47 UoBiA. Regulamin opiera się na wzorcowym regulaminie z rozporządzenia."},
+{b:"uobia", q:"Broń i amunicję przechowuje się w urządzeniach (sejf, szafa, kaseta) o klasie odporności na włamanie co najmniej:", a:["S1, potwierdzonej certyfikatem","S2, potwierdzonej certyfikatem","dowolnej, byle zamykane na klucz"], e:"Rozporządzenie MSW z 26.08.2014. Od 50 sztuk broni wymagany jest magazyn broni."},
+{b:"uobia", q:"„Noszenie broni” w rozumieniu przepisów oznacza:", a:["każdy sposób przemieszczania broni załadowanej przez posiadacza","przewożenie broni w futerale","posiadanie broni w domu"], e:"Noszenie = przemieszczanie się z bronią załadowaną; przenoszenie broni rozładowanej to co innego."},
+{b:"uobia", q:"Zakaz noszenia dotyczy broni posiadanej na podstawie pozwolenia do celów:", a:["kolekcjonerskich i pamiątkowych","sportowych","ochrony osobistej"], e:"Art. 10 ust. 8 UoBiA. Broń sportową, szkoleniową i do ochrony nosić wolno."},
+{b:"uobia", q:"W środkach transportu publicznego broń przewozi się:", a:["rozładowaną, bez amunicji w magazynkach","załadowaną, ale zabezpieczoną","rozładowaną, ale z załadowanym magazynkiem odłączonym od broni"], e:"Rozporządzenie z 10.04.2000. Wyjątek (podpięty załadowany magazynek) dotyczy tylko pozwoleń do ochrony osobistej / osób i mienia."},
+{b:"uobia", q:"Broń i amunicję można przesyłać:", a:["wyłącznie za pośrednictwem operatorów świadczących usługi pocztowe","dowolną firmą kurierską","osobiście przez znajomego z pozwoleniem"], e:"Naruszenie zakazu to wykroczenie z art. 51 ust. 2 pkt 6 UoBiA."},
+{b:"uobia", q:"Policja cofa pozwolenie na broń m.in. osobie, która:", a:["nosi broń w stanie po użyciu alkoholu","raz nie stawiła się na wezwanie WPA","nie strzelała na strzelnicy przez rok"], e:"Art. 18 UoBiA — obowiązkowe cofnięcie m.in. za noszenie broni po alkoholu lub utratę warunków (zdrowie, ważna przyczyna)."},
+
+// ---------- Przepisy karne ----------
+{b:"karne", q:"Kto bez wymaganego zezwolenia wyrabia broń palną albo amunicję lub nią handluje, podlega karze pozbawienia wolności:", a:["od roku do lat 10","od 6 miesięcy do lat 8","do lat 2"], e:"Art. 263 §1 KK — najsurowiej karany czyn z tego artykułu."},
+{b:"karne", q:"Kto bez wymaganego zezwolenia posiada broń palną lub amunicję, podlega karze pozbawienia wolności:", a:["od 6 miesięcy do lat 8","od roku do lat 10","grzywnie"], e:"Art. 263 §2 KK."},
+{b:"karne", q:"Kto, mając zezwolenie, udostępnia lub przekazuje broń osobie nieuprawnionej, podlega:", a:["grzywnie, karze ograniczenia wolności albo pozbawienia wolności do lat 2","karze pozbawienia wolności od roku do lat 10","wyłącznie grzywnie"], e:"Art. 263 §3 KK."},
+{b:"karne", q:"Kto nieumyślnie powoduje utratę broni palnej lub amunicji pozostającej w jego dyspozycji, podlega:", a:["grzywnie, karze ograniczenia wolności albo pozbawienia wolności do roku","karze pozbawienia wolności do lat 5","tylko odpowiedzialności administracyjnej"], e:"Art. 263 §4 KK. Praktyczny skutek to zwykle także utrata pozwolenia."},
+{b:"karne", q:"Kto porzuca broń palną lub amunicję, która pozostaje w jego dyspozycji, podlega:", a:["grzywnie, karze ograniczenia wolności albo pozbawienia wolności do lat 2","karze pozbawienia wolności od 6 miesięcy do lat 8","karze aresztu"], e:"Art. 50 UoBiA — porzucenie to przestępstwo, nie wykroczenie."},
+{b:"karne", q:"Noszenie broni w stanie po użyciu alkoholu, środka odurzającego lub psychotropowego jest:", a:["wykroczeniem zagrożonym karą aresztu albo grzywny","przestępstwem zagrożonym karą do 2 lat","dozwolone do 0,5 promila"], e:"Art. 51 ust. 2 pkt 4 UoBiA. Dodatkowo skutkuje obowiązkowym cofnięciem pozwolenia (art. 18)."},
+{b:"karne", q:"Dokonywanie istotnych przeróbek broni (np. przerobienie na broń samoczynną) jest traktowane jak:", a:["wyrób broni — przestępstwo z art. 263 §1 KK","wykroczenie z art. 51 UoBiA","naprawa broni, dozwolona dla posiadacza pozwolenia"], e:"Art. 6 UoBiA uznaje przeróbki za wyrób broni; grozi za to od 1 roku do 10 lat."},
+{b:"karne", q:"Posiadacz pozwolenia na broń centralnego zapłonu, u którego znaleziono jeden nabój bocznego zapłonu (bez pozwolenia na ten rodzaj), popełnia:", a:["przestępstwo posiadania amunicji bez zezwolenia (art. 263 §2 KK)","wykroczenie","nic — jeden nabój nie podlega karze"], e:"Amunicję wolno posiadać tylko do broni z legitymacji. Nawet jedna sztuka „obcej” amunicji to przestępstwo."},
+{b:"karne", q:"Przekazanie broni do strzelania osobie bez pozwolenia, na strzelnicy i pod nadzorem, jest:", a:["legalne — na strzelnicy nie ma „osób nieuprawnionych” (poza nietrzeźwymi)","przestępstwem z art. 263 §3 KK","wykroczeniem"], e:"Dlatego każdy może strzelać z cudzej broni na strzelnicy. Poza strzelnicą przekazanie osobie bez uprawnień to przestępstwo."},
+{b:"karne", q:"Posiadanie broni bez posiadania przy sobie legitymacji posiadacza broni podlega:", a:["karze grzywny","karze aresztu","karze pozbawienia wolności do roku"], e:"Art. 51 ust. 3 UoBiA."},
+{b:"karne", q:"W razie popełnienia wykroczeń z art. 51 UoBiA sąd może dodatkowo orzec:", a:["przepadek broni i amunicji, nawet jeśli nie należą do sprawcy","zakaz zbliżania się do strzelnic","obowiązek ponownego egzaminu"], e:"Art. 51 ust. 4 UoBiA."},
+{b:"karne", q:"Naruszanie przepisów regulaminu strzelnicy jest:", a:["wykroczeniem z art. 51 UoBiA","przestępstwem z art. 263 KK","wyłącznie sprawą wewnętrzną klubu"], e:"Art. 51 ust. 2 pkt 12 UoBiA — kara aresztu albo grzywny."},
+
+// ---------- Obrona konieczna ----------
+{b:"obrona", q:"Obrona konieczna polega na odpieraniu zamachu, który jest:", a:["bezpośredni i bezprawny, skierowany na jakiekolwiek dobro chronione prawem","dowolny, także przewidywany w przyszłości","skierowany wyłącznie na życie lub zdrowie"], e:"Art. 25 §1 KK. Zamach musi też być rzeczywisty (nie urojony)."},
+{b:"obrona", q:"Obrona konieczna to tzw. kontratyp, czyli:", a:["okoliczność wyłączająca bezprawność czynu","okoliczność łagodząca wymiar kary","rodzaj przestępstwa"], e:"Czyn popełniony w obronie koniecznej nie jest przestępstwem."},
+{b:"obrona", q:"Zamach jest „bezpośredni”, gdy:", a:["grozi niezwłocznym niebezpieczeństwem — wystarczy uzewnętrzniony zamiar ataku","napastnik zadał już pierwszy cios","napastnik zapowiedział atak na jutro"], e:"Nie trzeba czekać na cios; wystarczy np. że napastnik podbiega z podniesionym kijem."},
+{b:"obrona", q:"Eksces intensywny to:", a:["zastosowanie sposobu obrony niewspółmiernego do niebezpieczeństwa zamachu","obrona podjęta po zakończeniu zamachu","obrona podjęta przed rozpoczęciem zamachu"], e:"Intensywny = „za mocno”. Ekstensywny = zły moment (za wcześnie lub za późno)."},
+{b:"obrona", q:"Eksces ekstensywny to:", a:["obrona przedwczesna lub spóźniona względem zamachu","użycie broni palnej przeciw nieuzbrojonemu","obrona cudzego dobra"], e:"Np. pogoń i uderzenie uciekającego napastnika, gdy atak już ustał."},
+{b:"obrona", q:"W razie przekroczenia granic obrony koniecznej sąd:", a:["może zastosować nadzwyczajne złagodzenie kary, a nawet odstąpić od jej wymierzenia","musi wymierzyć karę w pełnej wysokości","umarza postępowanie z urzędu"], e:"Art. 25 §2 KK."},
+{b:"obrona", q:"Kto przekracza granice obrony koniecznej pod wpływem strachu lub wzburzenia usprawiedliwionych okolicznościami zamachu:", a:["nie podlega karze","podlega karze złagodzonej o połowę","podlega karze na zasadach ogólnych"], e:"Art. 25 §3 KK."},
+{b:"obrona", q:"Przekroczenie granic obrony przy odpieraniu wdarcia się do mieszkania, domu lub przyległego ogrodzonego terenu:", a:["nie podlega karze, chyba że przekroczenie było rażące","zawsze podlega karze","podlega karze tylko przy użyciu broni palnej"], e:"Art. 25 §2a KK."},
+{b:"obrona", q:"Osoba napadnięta:", a:["nie ma obowiązku ratowania się ucieczką i może odpierać zamach wszelkimi koniecznymi środkami","ma obowiązek najpierw próbować ucieczki","może się bronić tylko narzędziem podobnym do narzędzia napastnika"], e:"Orzecznictwo: przy obronie koniecznej nie obowiązuje zasada subsydiarności; obrona ma być skuteczna."},
+{b:"obrona", q:"Odpieranie zamachu skierowanego na dobro innej osoby (tzw. pomoc konieczna):", a:["również stanowi obronę konieczną","nie jest obroną konieczną","jest dozwolone tylko wobec członków rodziny"], e:"Art. 25 KK obejmuje „jakiekolwiek dobro chronione prawem” — własne lub cudze."},
+{b:"obrona", q:"Stan wyższej konieczności polega na:", a:["poświęceniu jednego dobra dla ratowania innego, gdy niebezpieczeństwa nie można inaczej uniknąć","odpieraniu bezprawnego zamachu człowieka","działaniu na rozkaz przełożonego"], e:"Art. 26 KK. Przykład: zastrzelenie psa atakującego człowieka, wybicie szyby w pożarze."},
+{b:"obrona", q:"W stanie wyższej konieczności dobro poświęcone:", a:["nie może przedstawiać wartości oczywiście wyższej od dobra ratowanego","musi być zawsze mniej warte niż ratowane","może być dowolne"], e:"Art. 26 §1–2 KK: niższe (§1) lub nie oczywiście wyższe (§2)."},
+
+// ---------- Bezpieczeństwo ----------
+{b:"bezp", q:"Za bezpieczne prowadzenie zawodów strzeleckich odpowiada:", a:["sędzia główny zawodów oraz sędzia prowadzący strzelanie","kierownik strzelnicy","każdy zawodnik za siebie"], e:"§1 zasad bezpieczeństwa PZSS; obaj muszą mieć licencję sędziego PZSS."},
+{b:"bezp", q:"Za bezpieczeństwo w zorganizowanym szkoleniu i strzelaniu rekreacyjnym odpowiada:", a:["prowadzący strzelanie","sędzia główny","najstarszy stopniem uczestnik"], e:"§1 ust. 2 zasad PZSS — prowadzący z uprawnieniami (licencja sędziego lub trenera)."},
+{b:"bezp", q:"Za organizację działań o charakterze ratunkowym na terenie strzelnicy odpowiada:", a:["kierownik strzelnicy","prowadzący strzelanie","organizator zawodów"], e:"§2 ust. 2 zasad bezpieczeństwa PZSS."},
+{b:"bezp", q:"Po wzięciu broni do ręki należy przede wszystkim:", a:["sprawdzić, czy jest rozładowana","sprawdzić działanie spustu","załadować ją na stanowisku"], e:"Zasada nr 2. Kolejność sprawdzania: najpierw odłącz magazynek, potem sprawdź komorę nabojową."},
+{b:"bezp", q:"Kierowanie wylotu lufy w kierunku ludzi jest:", a:["zabronione zawsze, nawet gdy broń jest rozładowana i sprawdzona","dozwolone, jeśli broń jest rozładowana","dozwolone za zgodą tej osoby"], e:"Zasada nr 3 — buduje podświadomą barierę, która ratuje życie przy niedokładnym rozładowaniu."},
+{b:"bezp", q:"Trening bezstrzałowy („na sucho”) jest dozwolony:", a:["na stanowisku strzeleckim lub w innym miejscu wyznaczonym za zgodą prowadzącego","w dowolnym miejscu strzelnicy","tylko w domu"], e:"Zasada nr 4."},
+{b:"bezp", q:"Odkładanie załadowanej broni w czasie przerw w strzelaniu jest:", a:["zabronione","dozwolone na stanowisku strzeleckim","dozwolone z zabezpieczonym bezpiecznikiem"], e:"Zasada nr 6. Przed odłożeniem broń trzeba rozładować i zabezpieczyć wskaźnikiem."},
+{b:"bezp", q:"Broń wolno ładować:", a:["wyłącznie na stanowisku, z lufą w kulochwyt, po komendzie prowadzącego","w dowolnym momencie na stanowisku","w poczekalni, żeby nie tracić czasu"], e:"Zasada nr 7."},
+{b:"bezp", q:"Podczas ładowania broni korzystanie z pomocy innych osób jest:", a:["zabronione","dozwolone dla początkujących","dozwolone za zgodą prowadzącego"], e:"Zasada nr 8 — ładujesz samodzielnie; jeśli nie umiesz, ćwicz na amunicji treningowej."},
+{b:"bezp", q:"Komendę lub sygnał „STOP” może wydać:", a:["każda osoba na strzelnicy, która zauważy niebezpieczeństwo","wyłącznie prowadzący strzelanie","wyłącznie sędzia główny"], e:"Po „STOP” wszyscy natychmiast przerywają strzelanie; wznowienie tylko na komendę prowadzącego."},
+{b:"bezp", q:"Po komendzie „ROZŁADUJ” należy:", a:["rozładować broń, włożyć do komory wskaźnik bezpieczeństwa i umieścić broń na stanowisku","schować broń do futerału","oddać ostatni strzał i odłożyć broń"], e:"Zasada nr 10; prowadzący kontroluje rozładowanie każdej broni."},
+{b:"bezp", q:"Stosowanie wskaźnika bezpieczeństwa jest obowiązkowe dla:", a:["wszystkich pistoletów, karabinów i strzelb gładkolufowych","tylko pistoletów","tylko broni centralnego zapłonu"], e:"Zasada nr 11. Wskaźnik potwierdza: broń rozładowana, zamek otwarty."},
+{b:"bezp", q:"Komendy „ŁADUJ”, „START”, „STOP”, „ROZŁADUJ” wydaje:", a:["prowadzący strzelanie","dowolny doświadczony strzelec","kierownik klubu"], e:"Zasada nr 12; prowadzący musi mieć pewność, że komendy są wykonywane."},
+{b:"bezp", q:"Osoba niestosująca się do poleceń prowadzącego strzelanie:", a:["może zostać usunięta ze strzelnicy","otrzymuje jedynie upomnienie","traci automatycznie pozwolenie na broń"], e:"Zasada nr 13."},
+{b:"bezp", q:"Po zakończeniu strzelania, przed opuszczeniem stanowiska, należy:", a:["rozładować broń, zabezpieczyć wskaźnikiem i przedstawić do kontroli prowadzącemu","schować broń i wpisać wynik","zabezpieczyć broń bezpiecznikiem i spakować"], e:"Zasada nr 14."},
+{b:"bezp", q:"Dzieci mogą przebywać na strzelnicy:", a:["wyłącznie pod bezpośrednim nadzorem rodziców lub opiekunów","od 15 roku życia samodzielnie","tylko w strefie widzów, nigdy przy stanowiskach"], e:"Zasada nr 18."},
+{b:"bezp", q:"Używanie ochronników słuchu i okularów na strzelnicy jest według zasad PZSS:", a:["zalecane","obowiązkowe pod karą usunięcia","wymagane tylko przy strzelbie"], e:"Zasady nr 16–17 mówią „zaleca się”. W praktyce niemal wszyscy używają ochrony słuchu."},
+{b:"bezp", q:"Skrót BLOS oznacza zasady:", a:["Broń (traktuj jak załadowaną), Lufa (w bezpiecznym kierunku), Otoczenie (pewność celu), Spust (palec poza spustem)","Bezpieczeństwo, Ładowanie, Ostrożność, Strzał","Broń, Legitymacja, Osłona, Słuchawki"], e:"Cztery filary bezpiecznego obchodzenia się z bronią."},
+{b:"bezp", q:"Palec na języku spustowym trzymamy:", a:["tylko bezpośrednio w momencie oddawania strzału","od momentu załadowania broni","zawsze, gdy broń jest w ręce"], e:"Palec to ostatni bezpiecznik — poza sekwencją strzału spoczywa na broni powyżej spustu."},
+{b:"bezp", q:"Każda osoba korzystająca ze strzelnicy ma obowiązek:", a:["wpisać się do książki (ewidencji) pobytu i potwierdzić podpisem znajomość regulaminu","okazać patent strzelecki","zdać broń do depozytu na czas przerw"], e:"Ewidencję prowadzi prowadzący strzelanie — wynika to ze wzorcowego regulaminu strzelnicy."},
+{b:"bezp", q:"Prawidłowa kolejność sprawdzania, czy broń (pistolet) jest rozładowana:", a:["odłączyć magazynek, następnie sprawdzić komorę nabojową","sprawdzić komorę, następnie odłączyć magazynek","nacisnąć spust w bezpiecznym kierunku"], e:"Najpierw magazynek — inaczej po przeładowaniu do komory trafi kolejny nabój. Lufa cały czas w bezpiecznym kierunku."},
+
+// ---------- Budowa broni ----------
+{b:"bron", q:"Broń samoczynna to broń, która:", a:["po jednym naciśnięciu spustu może wystrzelić więcej niż jeden pocisk (seria)","sama się przeładowuje, ale strzela pojedynczo","wymaga ręcznego przeładowania po każdym strzale"], e:"Np. karabiny i pistolety maszynowe. Strzelanie pojedyncze z samoprzeładowaniem to broń samopowtarzalna."},
+{b:"bron", q:"Broń samopowtarzalna:", a:["po strzale sama wprowadza kolejny nabój, ale jedno naciśnięcie spustu = jeden strzał","strzela seriami","wymaga ręcznego wprowadzenia naboju z zewnątrz po każdym strzale"], e:"Typowe pistolety, karabiny i strzelby półautomatyczne."},
+{b:"bron", q:"Broń powtarzalna to broń, w której:", a:["po strzale należy ręcznie przeładować, wprowadzając nabój z magazynka do komory","broń przeładowuje się sama","nabój wkłada się ręcznie z zewnątrz do komory"], e:"Np. strzelba „pompka”, karabin czterotaktowy, karabin lewarowy."},
+{b:"bron", q:"Broń jednostrzałowa to broń, w której:", a:["po każdym strzale nabój wprowadza się ręcznie z zewnątrz do komory nabojowej","magazynek mieści jeden nabój","strzela się tylko raz dziennie"], e:"Np. pojedynka myśliwska, pistolet dowolny, niektóre kbks."},
+{b:"bron", q:"Kaliber broni oznacza:", a:["najmniejszą średnicę przewodu lufy","długość lufy","średnicę pocisku razem z łuską"], e:"Wyrażany w mm, calach lub wagomiarze (liczba kul z funta ołowiu — np. kal. 12 w strzelbach)."},
+{b:"bron", q:"Nabój scalony składa się z:", a:["łuski, spłonki, ładunku prochu i pocisku","łuski, iglicy, prochu i pocisku","spłonki, prochu i pocisku bez łuski"], e:"Iglica to część broni, nie naboju — to ona zbija spłonkę."},
+{b:"bron", q:"Strzał zostaje zainicjowany, gdy:", a:["iglica uderza w spłonkę, która zapala ładunek prochowy","spust uderza bezpośrednio w proch","zamek uderza w pocisk"], e:"Spłonka detonuje przy zbiciu, zapala proch; gazy ze spalania wypychają pocisk przez lufę."},
+{b:"bron", q:"Gwint w lufie służy do:", a:["nadania pociskowi ruchu wirowego, stabilizującego lot i zwiększającego celność","zwiększenia prędkości pocisku","zmniejszenia hałasu wystrzału"], e:"Broń gładkolufowa (strzelby) nie ma gwintu."},
+{b:"bron", q:"Sprężyna oporopowrotna w pistolecie:", a:["zwraca zamek do przedniego położenia po strzale, umożliwiając wprowadzenie kolejnego naboju","napina kurek","wyrzuca łuskę z komory"], e:"Cofający się zamek wyrzuca łuskę, a wracając (pchany sprężyną) zabiera nabój z magazynka."},
+{b:"bron", q:"W większości pistoletów po wystrzeleniu ostatniego naboju:", a:["zamek zostaje zablokowany w tylnym położeniu","broń automatycznie się zabezpiecza","zamek wraca do przodu jak po każdym strzale"], e:"To sygnał dla strzelca o pustym magazynku."},
+{b:"bron", q:"Szczególna ostrożność przy broni strzelającej „z zamka otwartego” (np. stare pistolety maszynowe) wynika z tego, że:", a:["broń z cofniętym zamkiem jest gotowa do strzału, choć wygląda na niegotową","nie ma bezpiecznika","strzela wyłącznie seriami"], e:"Naciśnięcie spustu dopiero wprowadza nabój i oddaje strzał — cofnięty zamek mylnie kojarzy się z bronią bezpieczną."},
+{b:"bron", q:"W rewolwerze naboje umieszczone są:", a:["w obrotowym bębenku","w magazynku wewnątrz chwytu","bezpośrednio w lufie"], e:"Obrót bębenka (kurkiem lub spustem) podstawia kolejny nabój pod lufę. Uwaga na gazy ze szczeliny między bębnem a lufą."},
+{b:"bron", q:"W strzelectwie sportowym stosuje się amunicję:", a:["bocznego zapłonu, centralnego zapłonu i czarnoprochową","wyłącznie bocznego zapłonu","wyłącznie centralnego zapłonu"], e:"Amunicja czarnoprochowa może być scalona lub rozdzielnego ładowania."},
+{b:"bron", q:"Przed przystąpieniem do czyszczenia broni należy przede wszystkim:", a:["dokładnie sprawdzić, czy broń jest rozładowana","nasmarować lufę","rozłożyć broń na wszystkie części"], e:"Czyszczenie wymaga manipulowania bronią w różnych kierunkach — z nabojem w komorze byłoby skrajnie niebezpieczne."},
+{b:"bron", q:"Duży odrzut broni u osoby początkującej powoduje przede wszystkim:", a:["strach przed strzałem i spadek celności, a w skrajnych przypadkach ryzyko utraty kontroli nad bronią","szybsze zużycie amunicji","brak jakiegokolwiek wpływu"], e:"Dlatego naukę zaczyna się od słabych kalibrów (boczny zapłon) i stopniuje trudność."},
+
+// ---------- Przepisy sportowe ISSF ----------
+{b:"sport", q:"Skrót ISSF oznacza:", a:["Międzynarodową Federację Sportu Strzeleckiego","Międzynarodowy System Strzelectwa i Fechtunku","Europejską Unię Strzelecką"], e:"International Shooting Sport Federation — wydaje regulaminy sportu strzeleckiego."},
+{b:"sport", q:"Sport strzelecki realizowany jest w trzech dyscyplinach:", a:["pistolet, karabin, strzelba gładkolufowa","pistolet, karabin, łuk","broń krótka, długa i pneumatyczna"], e:"W każdej dyscyplinie rozgrywane są konkurencje."},
+{b:"sport", q:"Konkurencja strzelecka to:", a:["jednostka rywalizacji z określonym przebiegiem strzelań i przepisami","każdy trening na strzelnicy","nazwa zawodów rangi mistrzowskiej"], e:"Np. pistolet pneumatyczny 60 to konkurencja w dyscyplinie pistolet."},
+{b:"sport", q:"Kategoria wiekowa „juniorzy” obejmuje zawodników w wieku:", a:["18, 19 i 20 lat","16 i 17 lat","do 15 lat"], e:"Młodzicy do 15 lat, juniorzy młodsi 16–17, juniorzy 18–20, seniorzy od 21 (młodzieżowcy 21–23 to podgrupa seniorów)."},
+{b:"sport", q:"Kategoria „młodzieżowcy” to zawodnicy w wieku:", a:["21–23 lata (podgrupa seniorów)","18–20 lat","do 15 lat"], e:"Uwaga: młodzieżowcy są starsi niż juniorzy — to częsta pułapka."},
+{b:"sport", q:"Z broni pneumatycznej strzela się na odległość:", a:["10 m","25 m","50 m"], e:"10 m — pneumatyka; 25 m — kulowa krótka; 50 m — kbks i pistolet dowolny; 300 m — karabiny centralnego zapłonu."},
+{b:"sport", q:"Broń kulowa krótka (pistolety, rewolwery) na zawodach ISSF strzela na odległość:", a:["25 m","10 m","100 m"], e:"Wyjątek: małokalibrowy pistolet dowolny strzela też na 50 m."},
+{b:"sport", q:"Na odległość 300 m strzela się z:", a:["karabinów centralnego zapłonu","karabinów pneumatycznych","strzelb gładkolufowych"], e:"To najdłuższy dystans w strzelectwie ISSF."},
+{b:"sport", q:"Trzy postawy w konkurencjach karabinowych to:", a:["klęcząca, leżąca i stojąca","siedząca, leżąca i stojąca","klęcząca, kuczna i stojąca"], e:"Np. karabin dowolny 3x40 (mężczyźni) i karabin sportowy 3x20 (kobiety) na 50 m."},
+{b:"sport", q:"W konkurencji pistolet sportowy 25 m (część szybka) tarcza obrotowa jest widoczna dla zawodniczki przez:", a:["3 sekundy, po czym zamyka się na 7 sekund","5 sekund, po czym zamyka się na 5 sekund","10 sekund"], e:"W czasie 3 sekund oddaje się jeden strzał; seria to 5 strzałów."},
+{b:"sport", q:"W konkurencji pistolet centralnego zapłonu 25 m używa się broni o kalibrze:", a:["od 7,62 mm do 9,65 mm","do 6 mm","dowolnym"], e:"To odpowiednik pistoletu sportowego dla mężczyzn, ale na amunicji centralnego zapłonu."},
+{b:"sport", q:"W konkurencji TRAP do każdego rzutka można oddać:", a:["dwa strzały","jeden strzał","dowolną liczbę strzałów"], e:"Rzutki wyrzucane są ze schronu 15 m przed linią pięciu stanowisk."},
+{b:"sport", q:"W konkurencji SKEET do rzutka można oddać:", a:["tylko jeden strzał","dwa strzały","trzy strzały"], e:"Rzutki lecą z dwóch budek (wysokiej i niskiej); 8 stanowisk na wycinku okręgu."},
+{b:"sport", q:"Regulaminy ISSF ograniczają w broni sportowej m.in.:", a:["maksymalny ciężar broni i minimalny opór spustu","kolor broni","producenta broni"], e:"Także rodzaj przyrządów celowniczych i wymiary — im dłuższa linia celowania, tym łatwiej trafić."},
+{b:"sport", q:"Wynik w pistolecie dynamicznym oblicza się jako:", a:["sumę punktów podzieloną przez czas przebiegu","samą sumę punktów","sam czas przebiegu"], e:"Liczy się i celność, i szybkość. Broń centralnego zapłonu kal. min. 9 mm."},
+
+// ---------- Patent i PZSS ----------
+{b:"patent", q:"Aby przystąpić do egzaminu na patent strzelecki, trzeba mieć ukończone:", a:["18 lat","21 lat","16 lat"], e:"Uwaga: do patentu 18 lat, ale do pozwolenia na broń co do zasady 21 lat."},
+{b:"patent", q:"Część teoretyczna egzaminu na patent to:", a:["10 pytań ABC; zaliczenie od 9 poprawnych, przy czym pierwsze 4 pytania muszą być wszystkie poprawne","20 pytań ABCD; zaliczenie od 15 poprawnych","10 pytań otwartych"], e:"Pierwsze cztery pytania dotyczą UoBiA i zasad bezpieczeństwa — błąd w nich oznacza niezdanie. Czas: 20 minut."},
+{b:"patent", q:"Pytania testu patentowego losowane są po 2 z następujących zagadnień:", a:["UoBiA z przepisami wykonawczymi, zasady bezpieczeństwa, regulaminy strzeleckie, budowa broni sportowej, przepisy karne","tylko UoBiA i bezpieczeństwo","historia strzelectwa, balistyka, prawo, medycyna, regulaminy"], e:"5 zagadnień × 2 pytania = 10 pytań."},
+{b:"patent", q:"Do części praktycznej egzaminu patentowego można przystąpić:", a:["wyłącznie po zaliczeniu części teoretycznej","równolegle z teorią","najpierw praktyka, potem teoria"], e:"Oblanie teorii = koniec egzaminu w tym dniu."},
+{b:"patent", q:"Sprawdzian praktyczny z pistoletu na patencie to:", a:["25 m, 5 strzałów w 5 minut, minimum 4 przestrzeliny w kole o średnicy 15 cm","50 m, 10 strzałów, minimum 8 w tarczy","10 m, 5 strzałów, wszystkie w dziesiątce"], e:"Dopuszczalny chwyt oburęczny. Oceniane jest też bezpieczne posługiwanie się bronią."},
+{b:"patent", q:"Sprawdzian z karabinu bocznego zapłonu na 50 m (leżąc, z podpórką) wymaga:", a:["minimum 4 przestrzelin w kole o średnicy 5 cm","minimum 4 przestrzelin w kole 15 cm","wszystkich 5 strzałów w dziesiątce"], e:"Alternatywa: PCC/Mini Rifle/kbks na 25 m stojąc — min. 4 w kole 10 cm."},
+{b:"patent", q:"Sprawdzian ze strzelby w wariancie TRAP wymaga trafienia:", a:["minimum 2 z 5 rzutków","wszystkich 5 rzutków","minimum 4 z 5 rzutków"], e:"Warianty alternatywne: cele reaktywne (min. 4/5) lub Brenneke 25 m (min. 4 strzały w tarczy)."},
+{b:"patent", q:"Egzamin na patent można zdawać (zgodnie z regulaminem PZSS):", a:["wyłącznie w województwie siedziby swojego klubu","w dowolnym województwie","tylko w Warszawie"], e:"Rejonizacja z §15 regulaminu — decyduje siedziba klubu, nie miejsce zamieszkania."},
+{b:"patent", q:"Zgodnie z regulaminem PZSS (od 2025 r.) patent strzelecki:", a:["wygasa, jeśli posiadacz nie utrzymuje aktywnej licencji (zawodniczej, sędziowskiej, trenerskiej lub instruktorskiej)","jest bezterminowy","jest ważny 10 lat"], e:"Wcześniej patent był bezterminowy — to pytanie może odróżniać stare i nowe materiały."},
+{b:"patent", q:"Przed egzaminem patentowym wymagana jest rejestracja w systemie PZSS przez minimum:", a:["1 miesiąc","6 miesięcy","2 tygodnie"], e:"Liczy się data rejestracji w Portalu PZSS, nie data zapisu do klubu. Wymagane też szkolenie wstępne z egzaminem próbnym."},
+{b:"patent", q:"Posiadanie patentu strzeleckiego i licencji PZSS przy wniosku o pozwolenie na broń sportową:", a:["zwalnia z egzaminu przed Policją","obniża opłatę o połowę","skraca badania lekarskie"], e:"Art. 16 ust. 2 UoBiA."},
+{b:"patent", q:"Aby przedłużyć licencję zawodniczą PZSS, należy w ciągu roku:", a:["zaliczyć 4 starty w dyscyplinie podstawowej i po 2 starty w każdej kolejnej","zaliczyć 10 startów łącznie","opłacić składkę — starty nie są wymagane"], e:"Start w konkurencji łączącej dyscypliny liczy się do każdej z nich. Bez startów: płatny sprawdzian."},
+{b:"patent", q:"Zapisy na egzamin patentowy odbywają się:", a:["wyłącznie przez Portal PZSS (portal.pzss.org.pl)","telefonicznie w klubie","listownie do PZSS"], e:"Wniosek z Portalu wymaga pieczątki uprawnionego lekarza i podpisu kierownika klubu."},
+{b:"patent", q:"Wniosek o dopuszczenie do egzaminu patentowego może podbić:", a:["niemal każdy lekarz medycyny (z wyjątkami, m.in. stomatolog, psychiatra, pediatra)","wyłącznie lekarz uprawniony do badań na pozwolenie na broń","wyłącznie lekarz medycyny sportowej"], e:"To NIE jest to samo badanie co do pozwolenia na broń — tamto jest znacznie szersze."},
+];
+
+// ===================== BLOKI =====================
+const BLOCKS = [
+  {key:"uobia",  name:"UoBiA i przepisy wykonawcze"},
+  {key:"karne",  name:"Przepisy karne"},
+  {key:"obrona", name:"Obrona konieczna"},
+  {key:"bezp",   name:"Bezpieczeństwo w strzelectwie"},
+  {key:"bron",   name:"Budowa broni i amunicji"},
+  {key:"sport",  name:"Przepisy sportowe ISSF"},
+  {key:"patent", name:"Patent i PZSS"},
+];
+const BLOCK_NAME = Object.fromEntries(BLOCKS.map(b=>[b.key,b.name]));
+
+// ===================== STAN =====================
+let session = null; // {mode, blockKey, questions:[{item, shuffledA, correctIdx}], i, answers:[{correct, chosenText}]}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function prepare(items){
+  return items.map(item=>{
+    const order = shuffle([0,1,2]);
+    return {item, order, correctIdx: order.indexOf(0)};
+  });
+}
+
+function startBlock(key){
+  const items = shuffle(BANK.filter(x=>x.b===key));
+  session = {mode:"block", blockKey:key, questions:prepare(items), i:0, answers:[]};
+  showQuiz();
+}
+
+function startExam(){
+  const pick = (keys,n)=>shuffle(BANK.filter(x=>keys.includes(x.b))).slice(0,n);
+  const items = [
+    ...pick(["uobia"],2),          // 1-2: UoBiA (krytyczne)
+    ...pick(["bezp"],2),           // 3-4: bezpieczeństwo (krytyczne)
+    ...pick(["sport","patent"],2), // regulaminy strzeleckie
+    ...pick(["bron"],2),           // budowa broni
+    ...pick(["karne","obrona"],2), // przepisy karne
+  ];
+  session = {mode:"exam", blockKey:null, questions:prepare(items), i:0, answers:[]};
+  showQuiz();
+}
+
+function retrySame(){
+  if(!session) return quitToMenu();
+  if(session.mode==="exam") startExam(); else startBlock(session.blockKey);
+}
+
+// ===================== WIDOKI =====================
+const $ = id => document.getElementById(id);
+function show(view){
+  ["view-menu","view-quiz","view-summary"].forEach(v=>$(v).classList.add("hidden"));
+  $(view).classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+function quitToMenu(){ show("view-menu"); }
+
+function renderMenu(){
+  const list = $("block-list");
+  list.innerHTML = "";
+  BLOCKS.forEach(b=>{
+    const n = BANK.filter(x=>x.b===b.key).length;
+    const btn = document.createElement("button");
+    btn.className = "block-btn";
+    btn.innerHTML = `<span>${b.name}</span><span class="n">${n} pytań ›</span>`;
+    btn.onclick = ()=>startBlock(b.key);
+    list.appendChild(btn);
+  });
+}
+
+function showQuiz(){
+  show("view-quiz");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = session.questions[session.i];
+  const total = session.questions.length;
+  $("counter").textContent = `Pytanie ${session.i+1} / ${total}`;
+  $("pbar").style.width = (session.i/total*100) + "%";
+  $("qtag").textContent = (session.mode==="exam")
+    ? (session.i<4 ? "Egzamin · pytanie krytyczne (wymagana poprawna odpowiedź)" : "Egzamin próbny")
+    : BLOCK_NAME[q.item.b];
+  $("qtext").textContent = q.item.q;
+  const box = $("answers");
+  box.innerHTML = "";
+  q.order.forEach((origIdx, pos)=>{
+    const btn = document.createElement("button");
+    btn.className = "ans";
+    btn.textContent = q.item.a[origIdx];
+    btn.onclick = ()=>answer(pos);
+    box.appendChild(btn);
+  });
+  $("expl").classList.add("hidden");
+  $("next").classList.add("hidden");
+}
+
+function answer(pos){
+  const q = session.questions[session.i];
+  const btns = $("answers").children;
+  for(const b of btns) b.disabled = true;
+  const correct = (pos === q.correctIdx);
+  btns[q.correctIdx].classList.add("ok");
+  if(!correct){ btns[pos].classList.add("bad"); }
+  for(let k=0;k<btns.length;k++){
+    if(k!==q.correctIdx && k!==pos) btns[k].classList.add("dim");
+  }
+  session.answers.push({correct, chosenText: q.item.a[q.order[pos]]});
+  if(q.item.e){
+    $("expl").textContent = q.item.e;
+    $("expl").classList.remove("hidden");
+  }
+  const last = session.i === session.questions.length-1;
+  $("next").textContent = last ? "Zobacz podsumowanie" : "Dalej";
+  $("next").classList.remove("hidden");
+}
+
+function nextQuestion(){
+  session.i++;
+  if(session.i >= session.questions.length){ renderSummary(); }
+  else { renderQuestion(); window.scrollTo(0,0); }
+}
+
+function renderSummary(){
+  show("view-summary");
+  const total = session.questions.length;
+  const good = session.answers.filter(a=>a.correct).length;
+  $("sum-mode").textContent = session.mode==="exam" ? "Egzamin próbny" : "Blok: " + BLOCK_NAME[session.blockKey];
+  $("sum-score").textContent = `${good} / ${total}`;
+  const v = $("sum-verdict");
+  if(session.mode==="exam"){
+    const first4ok = session.answers.slice(0,4).every(a=>a.correct);
+    const pass = good>=9 && first4ok;
+    v.className = "verdict " + (pass?"pass":"fail");
+    v.textContent = pass ? "ZDANY ✔" : "NIEZDANY ✘";
+    $("sum-hint").textContent = pass
+      ? "Warunki spełnione: min. 9/10 i komplet w pierwszych 4 pytaniach."
+      : (!first4ok
+          ? "Błąd w pierwszych 4 pytaniach (UoBiA/bezpieczeństwo) — na prawdziwym egzaminie to automatyczne niezdanie."
+          : "Wymagane minimum to 9 poprawnych odpowiedzi na 10.");
+  } else {
+    const pct = Math.round(good/total*100);
+    v.className = "verdict " + (pct>=80?"pass":"fail");
+    v.textContent = pct + "%";
+    $("sum-hint").textContent = pct===100 ? "Komplet! Możesz przejść do kolejnego bloku."
+      : pct>=80 ? "Dobry wynik — powtórz jeszcze pytania poniżej."
+      : "Wróć do odpowiedniego rozdziału streszczenia i spróbuj ponownie.";
+  }
+  const wrongWrap = $("sum-wrong-wrap");
+  const wrongBox = $("sum-wrong");
+  wrongBox.innerHTML = "";
+  let anyWrong = false;
+  session.questions.forEach((q,idx)=>{
+    const a = session.answers[idx];
+    if(a.correct) return;
+    anyWrong = true;
+    const div = document.createElement("div");
+    div.className = "wrong-item";
+    div.innerHTML =
+      `<p class="wrong-q">${idx+1}. ${q.item.q}</p>`+
+      `<p class="wrong-a you"><span class="lbl">Twoja odpowiedź:</span> ${a.chosenText}</p>`+
+      `<p class="wrong-a corr"><span class="lbl">Poprawna:</span> ${q.item.a[0]}</p>`+
+      (q.item.e ? `<p class="wrong-a" style="color:var(--muted);font-size:14px;">${q.item.e}</p>` : "");
+    wrongBox.appendChild(div);
+  });
+  wrongWrap.classList.toggle("hidden", !anyWrong);
+}
+
+renderMenu();
+</script>
+</body>
+</html>
